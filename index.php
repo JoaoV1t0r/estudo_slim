@@ -2,34 +2,48 @@
 
 require './vendor/autoload.php';
 
+use Psr\Http\Message\ServerRequestInterface as Requeste;
+use Psr\Http\Message\ResponseInterface as Response;
+
 $app = new \Slim\App();
 
-$app->get('/postagens', function () {
+// Padrão PSR7
+$app->post('/usuarios/adicionar', function (Requeste $request, Response $response) {
+    //Recuperar o POST
+    $post = $request->getParsedBody();
+    $nome = $post['nome'];
+    $email = $post['email'];
 
-    echo 'Lista de Postagens';
+    /*Salvar no baco de dados com INSERT INTO...
+    ....... 
+    */
+
+    return $response->getBody()->write("Dados Salvos com Sucesso");
 });
 
-$app->get('/perfil[/{id}]', function ($request, $response) {
+$app->put('/usuarios/atualizar', function (Requeste $request, Response $response) {
+    //Atualiza os dados
+    $post = $request->getParsedBody();
+    $id = $post['id_usuario'];
+    $nome = $post['nome'];
+    $email = $post['email'];
+
+    /*Atualizar no baco de dados com UPDATE...
+    ....... 
+    */
+
+    return $response->getBody()->write("Dados Atualizados com Sucesso");
+});
+
+$app->delete('/usuarios/remover/{id}', function (Requeste $request, Response $response) {
+    //Apaga os dados
     $id = $request->getAttribute('id');
-    echo "Seu ID: " . $id;
-});
 
-$app->get('/lista_postagens[/{dia}[/{mes}[/{ano}]]]', function ($request, $response) {
-    $dia = $request->getAttribute('dia');
-    $mes = $request->getAttribute('mes');
-    $ano = $request->getAttribute('ano');
+    /*Apaga os dados no baco de dados com DELETE...
+    ....... 
+    */
 
-    echo "Data da postagem: " . $dia . '/' . $mes . '/' . $ano;
-})->setName("datas");
-
-$app->get('/meusite', function ($request, $response) {
-    $retorno = $this->get("router")->pathFor("datas", ["dia" => "02", "mes" => "10", "ano" => "2020"]);
-    echo $retorno;
-});
-
-$app->get('/lista/{itens:.*}', function ($request, $response) {
-    $itens = $request->getAttribute('itens');
-    var_dump(explode("/", $itens));
+    return $response->getBody()->write("Dados Deletados com Sucesso");
 });
 
 $app->run();

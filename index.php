@@ -11,20 +11,29 @@ $app = new \Slim\App([
     ]
 ]);
 
-//Container dependency injection
+//Tipos de respostas 
+//cabeçalho, text, json, xml
 
-class Servico
-{
-}
+$app->get('/header', function (Requeste $request, Response $response) {
+    //Retornar texto
+    $response->write('Esse é o retorno header');
+    return $response->withHeader('allow', 'PUT')
+        ->withAddedHeader('Content-Length', 10);
+});
 
-//Container Pimple
-$container = $app->getContainer();
-$container['Home'] = function () {
-    return new App\Controllers\Home(new \App\Views\View);
-};
+$app->get('/json', function (Requeste $request, Response $response) {
+    //Retornar json
+    return $response->withJson([
+        "nome" => "João Vitor"
+    ]);
+});
 
-//Usando Controllers
-//$app->get('/usuario', '\App\Controllers\Home:index');
-$app->get('/usuario', 'Home:index');
+$app->get('/xml', function (Requeste $request, Response $response) {
+    //Retornar xml
+    $xml = file_get_contents('arquivo.xml');
+    $response->write($xml);
+
+    return $response->withHeader('Content-Type', 'application/xml');
+});
 
 $app->run();

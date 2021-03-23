@@ -36,4 +36,30 @@ $app->get('/xml', function (Requeste $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/xml');
 });
 
+//Middleware
+
+$app->add(function ($request, $response, $next){
+    $response->write('Inicio Camada 1 + ');
+    //return $next($request, $response);
+    $response = $next($request, $response);
+    $response->write('+ Fim Camada 1');
+    return $response;
+});
+/*
+$app->add(function ($request, $response, $next){
+    $response->write('Inicio Camada 2 + ');
+    return $next($request, $response);
+    
+});
+*/
+$app->get('/usuarios', function (Requeste $request, Response $response) {
+    
+    $response->write('Ação Principal Usuarios');
+});
+
+$app->get('/postagens', function (Requeste $request, Response $response) {
+    
+    $response->write('Ação Principal Postagens');
+});
+
 $app->run();

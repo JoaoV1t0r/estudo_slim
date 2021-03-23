@@ -2,8 +2,9 @@
 
 require './vendor/autoload.php';
 
-use Psr\Http\Message\ServerRequestInterface as Requeste;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 $app = new \Slim\App([
     'settings' => [
@@ -11,55 +12,62 @@ $app = new \Slim\App([
     ]
 ]);
 
-//Tipos de respostas 
-//cabeçalho, text, json, xml
+$container = $app->getContainer();
+$container['db'] = function (){
+    $capsule = new Capsule;
 
-$app->get('/header', function (Requeste $request, Response $response) {
-    //Retornar texto
-    $response->write('Esse é o retorno header');
-    return $response->withHeader('allow', 'PUT')
-        ->withAddedHeader('Content-Length', 10);
-});
-
-$app->get('/json', function (Requeste $request, Response $response) {
-    //Retornar json
-    return $response->withJson([
-        "nome" => "João Vitor"
+    $capsule->addConnection([
+        'driver'    => 'mysql',
+        'host'      => 'localhost',
+        'database'  => 'slim',
+        'username'  => 'root',
+        'password'  => '',
+        'charset'   => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+        'prefix'    => '',
     ]);
-});
 
-$app->get('/xml', function (Requeste $request, Response $response) {
-    //Retornar xml
-    $xml = file_get_contents('arquivo.xml');
-    $response->write($xml);
+    $capsule->setAsGlobal();
+    $capsule->bootEloquent();
 
-    return $response->withHeader('Content-Type', 'application/xml');
-});
+    return $capsule;
+};
 
-//Middleware
+//Database
+$app->get('/usuarios', function (Request $request, Response $response){
+    $db = $this->get('db');
+    //Cria a Tabela
+    /*$db->schema->dropIfExists('usuarios');
+    $db->schema->create('usuarios', function ($table){
+        $table->increments('id');
+        $table->string('nome');
+        $table->string('email');
+        $table->timestamps();
+    });
 
-$app->add(function ($request, $response, $next){
-    $response->write('Inicio Camada 1 + ');
-    //return $next($request, $response);
-    $response = $next($request, $response);
-    $response->write('+ Fim Camada 1');
-    return $response;
-});
-/*
-$app->add(function ($request, $response, $next){
-    $response->write('Inicio Camada 2 + ');
-    return $next($request, $response);
-    
-});
-*/
-$app->get('/usuarios', function (Requeste $request, Response $response) {
-    
-    $response->write('Ação Principal Usuarios');
-});
+    //Insere dados na tabela
+    $db->table('usuarios')->insert([
+        'nome' => 'Nome',
+        'email' => 'E-mail'
+    ]);
 
-$app->get('/postagens', function (Requeste $request, Response $response) {
-    
-    $response->write('Ação Principal Postagens');
+    //Atualizar dados na tabela
+    $db->table('usuarios')
+        ->where('id', 1)
+        ->update([
+            'nome' => 'Nome 3'
+        ]);
+
+    //Deletar dados na tabela
+    $db->table('usuarios')
+        ->where('id', 2)
+        ->delete();*/
+
+    //Listar usuarios
+    $usuarios = $db->table('usuarios')->get();
+    foreach ($usuarios as $usuario) {
+        echo $usuario->nome . '<br>';
+    }
 });
 
 $app->run();
